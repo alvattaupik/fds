@@ -115,11 +115,11 @@ def load_assets():
         with open(f'{folder_path}model_metadata.json', 'r') as f:
             assets['metrics'] = json.load(f)
         return assets
-    except:
+    except Exception as e:
+        st.error(f"Gagal memuat model: {e}") # Munculkan pesan error di UI
         return None
-
-assets = load_assets()
-
+    
+    
 # ==========================================
 # 3. SIDEBAR NAVIGATION
 # ==========================================
