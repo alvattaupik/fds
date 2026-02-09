@@ -1,0 +1,35 @@
+{
+    "optimal_threshold": 0.9380138516426086,
+    "feature_names": [
+        "amount",
+        "oldbalanceOrg",
+        "newbalanceOrig",
+        "oldbalanceDest",
+        "newbalanceDest",
+        "step",
+        "errorBalanceOrig",
+        "errorBalanceDest",
+        "hour",
+        "type_CASH_OUT",
+        "type_TRANSFER",
+        "anomaly_score"
+    ],
+    "input_columns": [
+        "step",
+        "type",
+        "amount",
+        "oldbalanceOrg",
+        "newbalanceOrig",
+        "oldbalanceDest",
+        "newbalanceDest",
+        "errorBalanceOrig",
+        "errorBalanceDest",
+        "hour"
+    ],
+    "metrics": {
+        "f1_score": 0.9718482252141983,
+        "accuracy": 0.9998339595944282,
+        "precision": 0.9772307692307692,
+        "recall": 0.9665246500304321
+    }
+}

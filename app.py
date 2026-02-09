@@ -21,6 +21,8 @@ def get_base64_of_bin_file(bin_file):
 # Pastikan path file gambar benar
 img_base64 = get_base64_of_bin_file('assets/images/jaga logo.jpg')
 
+img_profile_base64 = get_base64_of_bin_file('assets/images/profile.jpg')
+
 # ==========================================
 # 1. KONFIGURASI HALAMAN & THEME
 # ==========================================
@@ -103,14 +105,14 @@ st.markdown("""
 # ==========================================
 @st.cache_resource
 def load_assets():
-    folder_path = 'models/v1/' 
+    folder_path = 'models/v1_2/' 
     try:
         assets = {
             'preprocessor': joblib.load(f'{folder_path}preprocessor.pkl'),
             'iso_forest': joblib.load(f'{folder_path}iso_forest_layer.pkl'),
             'xgb_model': joblib.load(f'{folder_path}model_fraud_xgb.pkl'),
         }
-        with open(f'{folder_path}metrics.json', 'r') as f:
+        with open(f'{folder_path}model_metadata.json', 'r') as f:
             assets['metrics'] = json.load(f)
         return assets
     except:
@@ -193,12 +195,12 @@ if selected_page == "Deteksi Fraud":
     
     # Grid untuk Metrics Utama
     if assets and 'metrics' in assets:
-        m = assets['metrics']
-        cols = st.columns(4)
-        cols[0].metric("Accuracy", f"{m['accuracy']:.1%}", "XGBoost")
-        cols[1].metric("Precision", f"{m['precision']:.1%}", "High")
-        cols[2].metric("Recall", f"{m['recall']:.1%}", "Sensitivity")
-        cols[3].metric("F1-Score", f"{m['f1_score']:.1%}", "Balanced")
+        full_metadata = assets['metrics']
+        m = full_metadata['metrics']
+        cols = st.columns(3)
+        cols[0].metric("Precision", f"{m['precision']:.1%}", "High")
+        cols[1].metric("Recall", f"{m['recall']:.1%}", "Sensitivity")
+        cols[2].metric("F1-Score", f"{m['f1_score']:.1%}", "Balanced")
     
     st.divider()
 
@@ -357,13 +359,13 @@ if selected_page == "Deteksi Fraud":
 # HALAMAN 2: PENJELASAN MODEL
 # ------------------------------------------
 elif selected_page == "Penjelasan Model":
-    st.title("📚 Arsitektur Sistem Sentinel AI")
+    st.title("📚 Arsitektur Sistem JAGA ")
     
     st.markdown("""
         <div style="background: linear-gradient(90deg, #1e3a8a 0%, #3b82f6 100%); padding: 30px; border-radius: 20px; color: white; margin-bottom: 30px;">
             <h3 style="margin:0;">Mengapa Menggunakan Pendekatan Hybrid?</h3>
             <p style="opacity: 0.9; font-size: 16px; margin-top: 10px;">
-                Penipuan transaksi (fraud) seringkali memiliki pola yang sangat cerdik dan terus berubah. Sentinel AI menggabungkan 
+                Penipuan transaksi (fraud) seringkali memiliki pola yang sangat cerdik dan terus berubah. JAGA menggabungkan 
                 <b>Unsupervised Learning</b> untuk mendeteksi anomali baru (Zero-day fraud) dan <b>Supervised Learning</b> 
                 untuk akurasi tinggi pada pola yang sudah dikenal.
             </p>
@@ -399,11 +401,11 @@ elif selected_page == "Penjelasan Model":
     with col_b:
         st.markdown("""
             <div style="border: 1px solid #e2e8f0; padding: 20px; border-radius: 15px; height: 100%;">
-                <img src="https://img.icons8.com/fluency/64/neural-network.png"/>
+                <img src="https://img.icons8.com/fluency/64/flash-on.png"/>
                 <h4 style="margin-top: 15px;">Layer 2: XGBoost Classifier</h4>
                 <p style="font-size: 14px; color: #64748b;"><b>Spesialisasi: Akurasi & Presisi</b></p>
                 <p style="font-size: 14px; line-height: 1.6;">
-                    Algoritma Gradient Boosting yang sangat kuat. Ia menerima input fitur transaksi beserta <b>skor dari Layer 1</b>.
+                    Algoritma Gradient Boosting yang sangat kuat. Ia menerima input fitur transaksi beserta <b>skor dari Layer 1</b> untuk klasifikasi akhir yang tajam.
                 </p>
             </div>
         """, unsafe_allow_html=True)
@@ -507,7 +509,6 @@ elif selected_page == "Tentang Dataset":
         """)
 
 
-
 # ------------------------------------------
 # HALAMAN 4: ABOUT ME (Profile Page)
 # ------------------------------------------
@@ -524,55 +525,59 @@ elif selected_page == "About Me":
     col_profile, col_desc = st.columns([1, 2.5], gap="large")
     
     with col_profile:
-        # Menampilkan foto dengan style lingkaran (Avatar)
-        st.markdown("""
+        # Menampilkan foto profil menggunakan variabel img_profile_base64
+        # Pastikan ada huruf 'f' sebelum tanda kutip triple agar variabel terbaca
+        st.markdown(f"""
             <style>
-            .profile-img {
-                width: 100%;
-                max-width: 220px;
+            .profile-container {{
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }}
+            .profile-img {{
+                width: 220px;
+                height: 220px;
+                object-fit: cover; /* Memastikan wajah tetap di tengah dan tidak gepeng */
                 border-radius: 50%;
-                border: 5px solid #fff;
+                border: 5px solid #ffffff;
                 box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-                display: block;
-                margin-left: auto;
-                margin-right: auto;
                 transition: transform 0.3s ease;
-            }
-            .profile-img:hover {
+            }}
+            .profile-img:hover {{
                 transform: scale(1.05);
-            }
+            }}
             </style>
-            <img src="https://avatars.githubusercontent.com/u/103986702?v=4" class="profile-img">
+            <div class="profile-container">
+                <img src="data:image/jpeg;base64,{img_profile_base64}" class="profile-img">
+            </div>
         """, unsafe_allow_html=True)
         
         st.markdown("<br>", unsafe_allow_html=True)
         
-        # Tombol Download CV (Opsional - Simulasi)
-        st.download_button(
-            label="📄 Download CV / Resume",
-            data="Simulasi Isi CV",
-            file_name="CV_Alvat_Taupik.pdf",
-            mime="application/pdf",
-            use_container_width=True
-        )
-        
+
     with col_desc:
         # Kartu Bio Utama
         st.markdown("""
             <div style="background-color: white; padding: 30px; border-radius: 15px; border: 1px solid #f1f5f9; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
                 <h2 style="color: #1e293b; margin-bottom: 5px; font-weight: 800;">Alvat Taupik Hidayat</h2>
-                <p style="color: #3b82f6; font-weight: 600; font-size: 16px; margin-top:0;">🚀 Data Scientist & AI Researcher</p>
+                <p style="color: #3b82f6; font-weight: 600; font-size: 16px; margin-top:0;">🚀 System Analyst, Data Scientist & AI Researcher</p>
                 <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 15px 0;">
                 
-                <p style="color: #475569; line-height: 1.7; font-size: 16px;">
-                    Halo! Saya adalah pengembang di balik <b>Arsitektur JAGA </b>. 
-                    Saya memiliki passion yang mendalam dalam mengubah data mentah menjadi solusi cerdas yang dapat memecahkan masalah dunia nyata, 
-                    khususnya dalam bidang <i>Financial Fraud Detection</i>.
+            
+            <div data-testid="stMarkdownContainer" class="st-emotion-cache-2fgyt4 e1t8ru6f0"><div style="background-color: rgb(241, 245, 249); padding: 20px; border-radius: 15px; border: 1px solid rgb(226, 232, 240);">
+                <p style="color: rgb(71, 85, 105); font-size: 14px;">
+                  Halo! Saya adalah Sistem Analis di balik Arsitektur JAGA.
+                  Fokus utama saya adalah menerjemahkan kebutuhan bisnis dan risiko operasional menjadi rancangan sistem teknologi yang terstruktur,
+                  terukur, dan berkelanjutan. 
+                  Dengan pendekatan analitis dan berbasis data, saya merancang solusi yang mampu mengolah data mentah menjadi sistem cerdas yang dapat diandalkan 
+                  dalam pengambilan keputusan—khususnya pada ranah Financial Fraud Detection.
                 </p>
-                <p style="color: #475569; line-height: 1.7; font-size: 16px;">
-                    Proyek Capstone ini mendemonstrasikan kemampuan saya dalam membangun <b>End-to-End Machine Learning Pipeline</b>, 
-                    mulai dari pengolahan data masif, pemodelan Hybrid (Unsupervised + Supervised), hingga deployment aplikasi interaktif.
-                </p>
+            </div></div>
+
+
+
+                   
+        
             </div>
         """, unsafe_allow_html=True)
 
