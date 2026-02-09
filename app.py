@@ -107,19 +107,29 @@ st.markdown("""
 def load_assets():
     folder_path = 'models/v1_2/' 
     try:
-        assets = {
-            'preprocessor': joblib.load(f'{folder_path}preprocessor.pkl'),
-            'iso_forest': joblib.load(f'{folder_path}iso_forest_layer.pkl'),
-            'xgb_model': joblib.load(f'{folder_path}model_fraud_xgb.pkl'),
-        }
+        # Kita definisikan secara eksplisit
+        preprocessor = joblib.load(f'{folder_path}preprocessor.pkl')
+        iso_forest = joblib.load(f'{folder_path}iso_forest_layer.pkl')
+        xgb_model = joblib.load(f'{folder_path}model_fraud_xgb.pkl')
+        
         with open(f'{folder_path}model_metadata.json', 'r') as f:
-            assets['metrics'] = json.load(f)
-        return assets
+            metrics = json.load(f)
+            
+        return {
+            'preprocessor': preprocessor,
+            'iso_forest': iso_forest,
+            'xgb_model': xgb_model,
+            'metrics': metrics
+        }
     except Exception as e:
-        st.error(f"Gagal memuat model: {e}") # Munculkan pesan error di UI
+        # Menampilkan pesan error spesifik ke UI Streamlit agar tidak bingung
+        st.error(f"⚠️ Kritis: Gagal memuat file model di {folder_path}")
+        st.info(f"Detail Error: {e}")
         return None
-    
-    
+
+# Pastikan baris ini ada di luar fungsi dan dipanggil sebelum baris 197
+assets = load_assets()
+
 # ==========================================
 # 3. SIDEBAR NAVIGATION
 # ==========================================
